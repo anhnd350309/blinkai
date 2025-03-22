@@ -14,7 +14,7 @@ import { WalletPlugin } from '@binkai/wallet-plugin';
 import { ethers } from 'ethers';
 import { getOrCreateWallet } from './twitter-db';
 
-async function main() {
+export async function transfer(twitterHandle: string, request: string): Promise<string> {
   // Define available networks
   const BNB_RPC = 'https://bsc-dataseed1.binance.org';
   const ETH_RPC = 'https://eth.llamarpc.com';
@@ -61,7 +61,6 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
-  const twitterHandle = 'uc_anh65363';
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
@@ -126,12 +125,12 @@ async function main() {
 
   // Execute token transfer through natural language
   const result = await agent.execute({
-    input: 'transfer 0.0001 BNB to 0xC1b1729127E4029174F183aB51a4B10c58Dc006d',
+    input: request,
   });
   console.log('🤖 Result:', result);
+  return result;
 }
 
-main().catch(error => {
-  console.error('❌ Error:', error.message);
-  process.exit(1);
-});
+// (async () => {
+//   await transfer('uc_anh65363', 'transfer 0.0001 BNB to 0xC1b1729127E4029174F183aB51a4B10c58Dc006d');
+// })();

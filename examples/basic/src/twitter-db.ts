@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise';
 import { ethers } from 'ethers';
 import { settings } from '@binkai/core';
 
-interface WalletInfo {
+export interface WalletInfo {
   privateKey: string;
   publicKey: string;
 }
@@ -54,6 +54,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
     }
 
     // If doesn't exist, create a new wallet
+    // @TODO: Create BNB wallet
     const wallet = ethers.Wallet.createRandom();
     const privateKey = wallet.privateKey;
     const publicKey = wallet.address;

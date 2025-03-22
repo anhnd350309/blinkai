@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import {
   Agent,
   Wallet,
@@ -8,16 +7,18 @@ import {
   NetworksConfig,
   NetworkName,
 } from '@binkai/core';
-import { SwapPlugin } from '@binkai/swap-plugin';
+import { TokenPlugin } from '@binkai/token-plugin';
+import { ethers } from 'ethers';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
+import { BirdeyeProvider } from '@binkai/birdeye-provider';
 import { getOrCreateWallet } from './twitter-db';
 
 // Hardcoded RPC URLs for demonstration
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
-const ETH_RPC = 'https://eth.llamarpc.com';
 
-async function main() {
-  console.log('🚀 Starting BinkOS swap example...\n');
+export async function createToken(twitterHandle: string, request: string): Promise<string> {
+  console.log('🚀 Starting BinkOS token info example...\n');
 
   // Check required environment variables
   if (!settings.has('OPENAI_API_KEY')) {
@@ -25,11 +26,28 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('🔑 OpenAI API key found\n');
+  if (!settings.has('BIRDEYE_API_KEY')) {
+    console.error('❌ Error: Please set BIRDEYE_API_KEY in your .env file');
+    process.exit(1);
+  }
+
+  console.log('🔑 API keys found\n');
 
   // Define available networks
   console.log('📡 Configuring networks...');
   const networks: NetworksConfig['networks'] = {
+    solana: {
+      type: 'solana' as NetworkType,
+      config: {
+        rpcUrl: SOLANA_RPC,
+        name: 'Solana',
+        nativeCurrency: {
+          name: 'Solana',
+          symbol: 'SOL',
+          decimals: 9,
+        },
+      },
+    },
     bnb: {
       type: 'evm' as NetworkType,
       config: {
@@ -43,19 +61,6 @@ async function main() {
         },
       },
     },
-    ethereum: {
-      type: 'evm' as NetworkType,
-      config: {
-        chainId: 1,
-        rpcUrl: ETH_RPC,
-        name: 'Ethereum',
-        nativeCurrency: {
-          name: 'Ether',
-          symbol: 'ETH',
-          decimals: 18,
-        },
-      },
-    },
   };
   console.log('✓ Networks configured:', Object.keys(networks).join(', '), '\n');
 
@@ -64,14 +69,8 @@ async function main() {
   const network = new Network({ networks });
   console.log('✓ Network initialized\n');
 
-  // Initialize provider
-  console.log('🔌 Initializing provider...');
-  const provider = new ethers.JsonRpcProvider(BNB_RPC);
-  console.log('✓ Provider initialized\n');
-
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
-  const twitterHandle = 'uc_anh65363';
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
@@ -84,17 +83,16 @@ async function main() {
     },
     network,
   );
-  console.log('👛 Wallet:', network.getConfig(NetworkName.BNB));
-
   console.log('✓ Wallet created\n');
 
+  console.log('🤖 Wallet Solana:', await wallet.getAddress(NetworkName.SOLANA));
   console.log('🤖 Wallet BNB:', await wallet.getAddress(NetworkName.BNB));
-  console.log('🤖 Wallet ETH:', await wallet.getAddress(NetworkName.ETHEREUM));
+
   // Create an agent with OpenAI
   console.log('🤖 Initializing AI agent...');
   const agent = new Agent(
     {
-      model: 'gpt-4o',
+      model: 'gpt-4',
       temperature: 0,
     },
     wallet,
@@ -102,49 +100,37 @@ async function main() {
   );
   console.log('✓ Agent initialized\n');
 
-  // Create and configure the swap plugin
-  console.log('🔄 Initializing swap plugin...');
-  const swapPlugin = new SwapPlugin();
+  // Create and configure the token plugin
+  console.log('🔍 Initializing token plugin...');
+  const tokenPlugin = new TokenPlugin();
 
-  // Create providers with proper chain IDs
+  const provider = new ethers.JsonRpcProvider(BNB_RPC);
+
   const fourMeme = new FourMemeProvider(provider, 56);
-
-  // Configure the plugin with supported chains
-  await swapPlugin.initialize({
-    defaultSlippage: 0.5,
-    defaultChain: 'bnb',
-    providers: [fourMeme],
-    supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
+  const birdeye = new BirdeyeProvider({
+    apiKey: settings.get('BIRDEYE_API_KEY'),
   });
-  console.log('✓ Swap plugin initialized\n');
+  // Configure the plugin with supported chains
+  await tokenPlugin.initialize({
+    defaultChain: 'bnb',
+    providers: [birdeye, fourMeme as any],
+    supportedChains: ['bnb'],
+  });
+  console.log('✓ Token plugin initialized\n');
 
   // Register the plugin with the agent
-  console.log('🔌 Registering swap plugin with agent...');
-  await agent.registerPlugin(swapPlugin);
+  console.log('🔌 Registering token plugin with agent...');
+  await agent.registerPlugin(tokenPlugin);
   console.log('✓ Plugin registered\n');
 
-  console.log('💱 Example 1: Buy SAFUFOUR');
-  const inputResult = await agent.execute({
-    input: `
-      Buy 0.0001 BNB to SAFUFOUR on FourMeme bnb chain with 10 % slippage.
-      Use the following token addresses:
-      SAFUFOUR: 0xcf4eef00d87488d523de9c54bf1ba3166532ddb0
-    `,
+  // Example 1: Create a token on BSC
+  console.log('💎 Example 1: Create a token on BSC');
+  const result = await agent.execute({
+    input: request,
   });
-  console.log('✓ Swap result (input):', inputResult, '\n');
-
-  console.log('💱 Example 2: Sell SAFUFOUR');
-  const outputResult = await agent.execute({
-    input: `
-      Sell 100 SAFUFOUR on FourMeme bnb chain with 10 % slippage.
-      Use the following token addresses:
-      SAFUFOUR: 0xcf4eef00d87488d523de9c54bf1ba3166532ddb0
-    `,
-  });
-  console.log('✓ Swap result (input):', outputResult, '\n');
-
+  console.log('✓ Token created:', result, '\n');
   // Get plugin information
-  const registeredPlugin = agent.getPlugin('swap') as SwapPlugin;
+  const registeredPlugin = agent.getPlugin('token') as TokenPlugin;
 
   // Check available providers for each chain
   console.log('📊 Available providers by chain:');
@@ -153,10 +139,10 @@ async function main() {
     const providers = registeredPlugin.getProvidersForNetwork(chain);
     console.log(`Chain ${chain}:`, providers.map(p => p.getName()).join(', '));
   }
-  // console.log();
+  console.log();
+  return result;
 }
 
-main().catch(error => {
-  console.error('❌ Error:', error.message);
-  process.exit(1);
-});
+//   (async () => {
+//     await createToken('uc_anh65363', 'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.');
+//   })();
