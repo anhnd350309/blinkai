@@ -61,7 +61,7 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
-  const twitterHandle = 'uc_anh65363';
+  const twitterHandle = 'testHandle';
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(

@@ -144,5 +144,5 @@ export async function createToken(twitterHandle: string, request: string): Promi
 }
 
 //   (async () => {
-//     await createToken('uc_anh65363', 'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.');
+//     await createToken('testHandle', 'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.');
 //   })();

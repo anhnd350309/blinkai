@@ -132,5 +132,5 @@ export async function transfer(twitterHandle: string, request: string): Promise<
 }
 
 // (async () => {
-//   await transfer('uc_anh65363', 'transfer 0.0001 BNB to 0xC1b1729127E4029174F183aB51a4B10c58Dc006d');
+//   await transfer('testHandle', 'transfer 0.0001 BNB to 0xC1b1729127E4029174F183aB51a4B10c58Dc006d');
 // })();
