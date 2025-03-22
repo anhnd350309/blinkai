@@ -25,7 +25,7 @@ import {
 } from './types';
 
 export class Wallet implements IWallet {
-  readonly #evmWallet: ethers.HDNodeWallet;
+  readonly #evmWallet: ethers.HDNodeWallet | ethers.Wallet;
   readonly #solanaKeypair: Keypair;
   readonly #network: Network;
 
@@ -33,13 +33,23 @@ export class Wallet implements IWallet {
     this.#network = network;
 
     // Initialize EVM wallet
-    this.#evmWallet = ethers.Wallet.fromPhrase(config.seedPhrase);
+    if (config.privateKey) {
+      this.#evmWallet = new ethers.Wallet(config.privateKey);
+    } else if (config.seedPhrase) {
+      this.#evmWallet = ethers.Wallet.fromPhrase(config.seedPhrase);
+    } else {
+      throw new Error('Either privateKey or seedPhrase must be provided');
+    }
 
     // Initialize Solana wallet
-    const seed = mnemonicToSeedSync(config.seedPhrase);
-    const derivedPath = `m/44'/501'/${config.index ?? 0}'/0'`;
-    const keyPair = derivePath(derivedPath, seed.toString('hex'));
-    this.#solanaKeypair = Keypair.fromSeed(keyPair.key);
+    if (config.seedPhrase) {
+      const seed = mnemonicToSeedSync(config.seedPhrase);
+      const derivedPath = `m/44'/501'/${config.index ?? 0}'/0'`;
+      const keyPair = derivePath(derivedPath, seed.toString('hex'));
+      this.#solanaKeypair = Keypair.fromSeed(keyPair.key);
+    } else {
+      throw new Error('seedPhrase is required for Solana wallet');
+    }
   }
 
   public async getAddress(network: NetworkName): Promise<string> {
@@ -87,7 +97,7 @@ export class Wallet implements IWallet {
     const networkType = this.#network.getNetworkType(network);
 
     if (networkType === 'evm') {
-      return this.#evmWallet.publicKey;
+      return this.#evmWallet.address;
     } else {
       return this.#solanaKeypair.publicKey.toBase58();
     }

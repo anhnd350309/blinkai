@@ -5,7 +5,8 @@ import { NetworkName } from '../network/types';
 export type TransactionType = EvmTransaction | SolanaTransaction | VersionedTransaction;
 
 export interface WalletConfig {
-  seedPhrase: string;
+  seedPhrase?: string;
+  privateKey?: string;
   index?: number;
 }
 

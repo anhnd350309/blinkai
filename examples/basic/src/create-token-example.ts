@@ -11,6 +11,7 @@ import { TokenPlugin } from '@binkai/token-plugin';
 import { ethers } from 'ethers';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
 import { BirdeyeProvider } from '@binkai/birdeye-provider';
+import { getOrCreateWallet } from './twitter-db';
 
 // Hardcoded RPC URLs for demonstration
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
@@ -70,11 +71,15 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
+  const twitterHandle = 'uc_anh65363';
+  const walletInfo = await getOrCreateWallet(twitterHandle);
+  const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
     {
       seedPhrase:
         settings.get('WALLET_MNEMONIC') ||
         'test test test test test test test test test test test junk',
+      privateKey,
       index: 0,
     },
     network,
@@ -123,7 +128,7 @@ async function main() {
   console.log('💎 Example 1: Create a token on BSC');
   const result = await agent.execute({
     input:
-      'Create a new token on BNB chain with name: "OXdavid", symbol: "Ox", description: "This is a Ken Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.',
+      'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.',
   });
   console.log('✓ Token created:', result, '\n');
   // Get plugin information

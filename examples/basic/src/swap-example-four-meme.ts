@@ -10,6 +10,7 @@ import {
 } from '@binkai/core';
 import { SwapPlugin } from '@binkai/swap-plugin';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
+import { getOrCreateWallet } from './twitter-db';
 
 // Hardcoded RPC URLs for demonstration
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
@@ -70,15 +71,20 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
+  const twitterHandle = 'uc_anh65363';
+  const walletInfo = await getOrCreateWallet(twitterHandle);
+  const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
     {
       seedPhrase:
         settings.get('WALLET_MNEMONIC') ||
         'test test test test test test test test test test test junk',
+      privateKey,
       index: 0,
     },
     network,
   );
+  console.log('👛 Wallet:', network.getConfig(NetworkName.BNB));
 
   console.log('✓ Wallet created\n');
 

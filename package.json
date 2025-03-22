@@ -27,7 +27,9 @@
       "prettier --write"
     ]
   },
-  "dependencies": {},
+  "dependencies": {
+    "mysql2": "^3.14.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
     "@commitlint/config-conventional": "^19.7.1",

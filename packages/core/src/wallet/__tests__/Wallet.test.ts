@@ -41,6 +41,7 @@ describe('Wallet', () => {
 
   const walletConfig: WalletConfig = {
     seedPhrase: 'test test test test test test test test test test test junk',
+    privateKey: '0x1234567890123456789012345678901234567890123456789012345678901234',
     index: 0,
   };
 
@@ -55,12 +56,20 @@ describe('Wallet', () => {
   describe('EVM Functionality', () => {
     const networkName = NetworkName.SEPOLIA;
 
-    it('should generate correct EVM address', async () => {
-      const address = await wallet.getAddress(networkName);
+    it('should generate correct EVM address from private key', async () => {
+      const privateKeyWallet = new Wallet({ privateKey: walletConfig.privateKey }, network);
+      const address = await privateKeyWallet.getAddress(networkName);
+      expect(address).toMatch(/^0x[a-fA-F0-9]{40}$/);
+      expect(address).toBe(new ethers.Wallet(walletConfig.privateKey!).address);
+    });
+
+    it('should generate correct EVM address from seed phrase', async () => {
+      const seedPhraseWallet = new Wallet({ seedPhrase: walletConfig.seedPhrase }, network);
+      const address = await seedPhraseWallet.getAddress(networkName);
       expect(address).toMatch(/^0x[a-fA-F0-9]{40}$/);
       expect(address).toBe(
         ethers.HDNodeWallet.fromPhrase(
-          walletConfig.seedPhrase,
+          walletConfig.seedPhrase!,
           `m/44'/60'/0'/0/${walletConfig.index}`,
         ).address,
       );

@@ -12,6 +12,7 @@ import {
 import { TokenPlugin } from '@binkai/token-plugin';
 import { WalletPlugin } from '@binkai/wallet-plugin';
 import { ethers } from 'ethers';
+import { getOrCreateWallet } from './twitter-db';
 
 async function main() {
   // Define available networks
@@ -60,11 +61,15 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
+  const twitterHandle = 'uc_anh65363';
+  const walletInfo = await getOrCreateWallet(twitterHandle);
+  const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
     {
       seedPhrase:
         settings.get('WALLET_MNEMONIC') ||
         'test test test test test test test test test test test junk',
+      privateKey,
       index: 0,
     },
     network,
@@ -121,7 +126,7 @@ async function main() {
 
   // Execute token transfer through natural language
   const result = await agent.execute({
-    input: 'transfer 10000 BINK to',
+    input: 'transfer 0.0001 BNB to 0x93FE74c3f94AdEba27f725C4170b5bAb39730D6A',
   });
   console.log('🤖 Result:', result);
 }
