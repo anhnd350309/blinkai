@@ -15,8 +15,7 @@ import { SwapPlugin } from '@binkai/swap-plugin';
 import { WalletPlugin } from '@binkai/wallet-plugin';
 import { BnbProvider } from '@binkai/rpc-provider';
 import { BirdeyeProvider } from '@binkai/birdeye-provider';
-import { swapFourMeme } from './swap-four-meme';
-import { PostgresDatabaseAdapter } from '../../../packages/adapters/postgres/src/postgres';
+import { PostgresDatabaseAdapter } from '@binkai/postgres-adapter';
 // Hardcoded RPC URLs for demonstration
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
