@@ -13,6 +13,7 @@ export interface AgentConfig {
   temperature?: number;
   maxTokens?: number;
   systemPrompt?: string;
+  character?: string;
 }
 
 export interface AgentContext {

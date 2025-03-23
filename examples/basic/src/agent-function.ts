@@ -16,6 +16,7 @@ import { WalletPlugin } from '@binkai/wallet-plugin';
 import { BnbProvider } from '@binkai/rpc-provider';
 import { BirdeyeProvider } from '@binkai/birdeye-provider';
 import { swapFourMeme } from './swap-four-meme';
+import { PostgresDatabaseAdapter } from '../../../packages/adapters/postgres/src/postgres';
 // Hardcoded RPC URLs for demonstration
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
@@ -95,6 +96,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
     {
       model: 'gpt-4o',
       temperature: 0,
+      character: 'a friendly and funny agent.',
     },
     wallet,
     networks,
@@ -103,6 +105,12 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // Create and configure the token plugin
   console.log('🔍 Initializing token plugin...');
+  await agent.registerDatabase(
+    new PostgresDatabaseAdapter({
+      connectionString: settings.get('POSTGRES_URL'),
+    }),
+  );
+
   const tokenPlugin = new TokenPlugin();
 
   const provider = new ethers.JsonRpcProvider(BNB_RPC);
@@ -169,10 +177,9 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // Agent execute
   console.log('💱 Executing user request...');
-  const result = await agent.execute({
-    input: request,
-  });
+  const result = await agent.execute(request);
   console.log('✓ User request executed:', result);
+  console.log('💱 length of result:', result.length);
   return result;
 }
 
