@@ -147,7 +147,7 @@ export class Agent extends BaseAgent {
 
   private async createExecutor(): Promise<AgentExecutor> {
     const wallet_address = await this.wallet?.getAddress(NetworkName.BNB);
-
+    console.log('wallet_address', wallet_address);
     const requiredPrompt = `
     Native token address: 
     - EVM (${Object.values(this.networks)
@@ -157,19 +157,20 @@ export class Agent extends BaseAgent {
     - Solana: ${SOL_NATIVE_TOKEN_ADDRESS}
     Available networks include: ${Object.keys(this.networks).join(', ')}`;
 
-    const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'}.
-     You can help users interact with different blockchain networks. 
-     If user ask you questions which are not related to blockchain, you must response as an normal agent with the personality I set for you., then do not do anything else.
+    const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'} and you can use the project owner wallet to pay gas fee for deploying token(just deploy token, not transfer or swap).
+     You can help users interact with BNB smart chain. 
+     If user ask you questions which are not related to blockchain, you must response as an normal agent with the personality I set for you,then do not do anything else.
     Else,
      First, you need to understand the user's request and then you need to choose the appropriate tool to execute the user's request.
     When error occurs, describe the error in shortest way.
     Ask users if your understanding is correct and if you need to change anything in the process you have done.
     Respond to the question without inserting blank lines between paragraphs. Ensure all content is written continuously, only breaking lines when necessary.
-    In case you deploy a token, just return the status with the link.
     In case you swap tokens, just return the status, amount, address of the token you swapped from and swapped to.
     In case you transfer tokens, just return the status, and the link of the transaction.
     In case user want to create wallet, return this address which is belong to bnb network: ${wallet_address}.
-    In case user said that this is the first time user chat with you, add this to your response: "Your wallet address is ${wallet_address}. Please deposit money to continue"
+    In case they want to transfer and swap(only this two cases) and the transaction is failed, report the error and add this to your response: "Your wallet address is ${wallet_address}. Make sure it has enough funds to process."
+    In case you deploy a token, just return the status with the link. Only when you deploy or create token AND if you confront with error related to be insufficient balance, return "The project owner's wallet is run out of funds because of too much transactions. Please try again later."
+    
     Because of the policy of twitter, max output of length is 280 characters, so you must response to user in a as short as possible(less than 60 words)
     
     Just return What I instructed you to do.DO NOT ask users anything else.
@@ -229,7 +230,7 @@ export class Agent extends BaseAgent {
         : new AIMessage(message?.content),
     );
     console.log(history.length);
-    const more_info = history.length == 0 ? 'This is the first time I chat with you.' : '';
+    const more_info = '';
 
     const maxRetries = 3;
     let retryCount = 0;

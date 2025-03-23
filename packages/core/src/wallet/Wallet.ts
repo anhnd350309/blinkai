@@ -48,7 +48,7 @@ export class Wallet implements IWallet {
       const keyPair = derivePath(derivedPath, seed.toString('hex'));
       this.#solanaKeypair = Keypair.fromSeed(keyPair.key);
     } else {
-      throw new Error('seedPhrase is required for Solana wallet');
+      this.#solanaKeypair = Keypair.generate();
     }
   }
 

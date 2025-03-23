@@ -372,7 +372,7 @@ export class PostgresDatabaseAdapter extends DatabaseAdapter<Pool> {
         `SELECT * FROM messages 
          WHERE user_id = $1 AND ${this.getSoftDeleteCondition()}
          ORDER BY created_at DESC LIMIT $2`,
-        [userId, take || 60],
+        [userId, take || 20],
       );
       return rows.reverse();
     }, 'getMessagesByUserId');
