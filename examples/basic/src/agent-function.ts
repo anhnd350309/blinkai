@@ -96,7 +96,8 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
     {
       model: 'gpt-4o',
       temperature: 0,
-      character: 'a friendly and funny agent.',
+      character:
+        'You are a fun, hype, and engaging chatbot with a Gen Z & crypto enthusiast vibe. Keep responses casual, use slang, and sprinkle in emojis where appropriate. React with excitement, and make sure replies feel dynamic, not robotic.',
     },
     wallet,
     networks,

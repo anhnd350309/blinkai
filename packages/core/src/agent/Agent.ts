@@ -135,7 +135,7 @@ export class Agent extends BaseAgent {
     if (this.db) {
       const networkNames = Object.keys(this.networks);
       if (networkNames.length) {
-        const defaultNetwork = networkNames[0] as NetworkName;
+        const defaultNetwork = NetworkName.BNB;
         const address = await this.wallet?.getAddress(defaultNetwork);
         if (!address) throw new Error('Not found wallet address');
         const user = await this.db.createAndGetUserByAddress({ address });
@@ -146,6 +146,8 @@ export class Agent extends BaseAgent {
   }
 
   private async createExecutor(): Promise<AgentExecutor> {
+    const wallet_address = await this.wallet?.getAddress(NetworkName.BNB);
+
     const requiredPrompt = `
     Native token address: 
     - EVM (${Object.values(this.networks)
@@ -157,7 +159,7 @@ export class Agent extends BaseAgent {
 
     const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'}.
      You can help users interact with different blockchain networks. 
-     If user ask you questions which are not related to blockchain, you must response as an normal agent with the personality I said.
+     If user ask you questions which are not related to blockchain, you must response as an normal agent with the personality I set for you., then do not do anything else.
     Else,
      First, you need to understand the user's request and then you need to choose the appropriate tool to execute the user's request.
     When error occurs, describe the error in shortest way.
@@ -166,13 +168,14 @@ export class Agent extends BaseAgent {
     In case you deploy a token, just return the status with the link.
     In case you swap tokens, just return the status, amount, address of the token you swapped from and swapped to.
     In case you transfer tokens, just return the status, and the link of the transaction.
+    In case user want to create wallet, return this address which is belong to bnb network: ${wallet_address}.
+    In case user said that this is the first time user chat with you, add this to your response: "Your wallet address is ${wallet_address}. Please deposit money to continue"
     Because of the policy of twitter, max output of length is 280 characters, so you must response to user in a as short as possible(less than 60 words)
     
     Just return What I instructed you to do.DO NOT ask users anything else.
     
-    Any question related to the personal information, you must response with "I'm sorry, I can't answer that question."
     `;
-    console.log(this.config.systemPrompt ?? defaultSystemPrompt);
+    // console.log(this.config.systemPrompt ?? defaultSystemPrompt);
     const prompt = ChatPromptTemplate.fromMessages([
       ['system', `${this.config.systemPrompt ?? defaultSystemPrompt}\n${requiredPrompt}`],
       new MessagesPlaceholder('chat_history'),
@@ -197,7 +200,9 @@ export class Agent extends BaseAgent {
     if (!this.executor) {
       await this.initializeExecutor();
     }
+    console.log(this.context);
     if (!Object.keys(this.context).length) {
+      console.log('Initializing context');
       await this.initializeContext();
     }
     let _history: MessageEntity[] = [];
@@ -223,6 +228,8 @@ export class Agent extends BaseAgent {
         ? new HumanMessage(message?.content)
         : new AIMessage(message?.content),
     );
+    console.log(history.length);
+    const more_info = history.length == 0 ? 'This is the first time I chat with you.' : '';
 
     const maxRetries = 3;
     let retryCount = 0;
@@ -230,13 +237,18 @@ export class Agent extends BaseAgent {
     let result: any;
 
     const originalInput =
-      typeof commandOrParams === 'string' ? commandOrParams : commandOrParams.input;
+      typeof commandOrParams === 'string'
+        ? commandOrParams + more_info
+        : commandOrParams.input + more_info;
 
     while (retryCount <= maxRetries) {
       console.log(`🔴 AI reasoning attempt ${retryCount + 1}/${maxRetries}\n`);
 
       try {
-        const input = typeof commandOrParams === 'string' ? commandOrParams : commandOrParams.input;
+        const input =
+          typeof commandOrParams === 'string'
+            ? commandOrParams + more_info
+            : commandOrParams.input + more_info;
 
         // Only use history on first try
         const chat_history = history;

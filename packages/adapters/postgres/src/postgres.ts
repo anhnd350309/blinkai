@@ -240,6 +240,8 @@ export class PostgresDatabaseAdapter extends DatabaseAdapter<Pool> {
   }
 
   async createAndGetUserByAddress(user: UserEntity): Promise<UserEntity | null> {
+    console.log('Creating user');
+    console.log(user.address);
     return this.wrapDatabase(async () => {
       try {
         if (!user.address) {
@@ -370,7 +372,7 @@ export class PostgresDatabaseAdapter extends DatabaseAdapter<Pool> {
         `SELECT * FROM messages 
          WHERE user_id = $1 AND ${this.getSoftDeleteCondition()}
          ORDER BY created_at DESC LIMIT $2`,
-        [userId, take || 10],
+        [userId, take || 60],
       );
       return rows.reverse();
     }, 'getMessagesByUserId');
