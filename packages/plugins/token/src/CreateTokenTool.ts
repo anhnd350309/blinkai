@@ -4,8 +4,13 @@ import {
   CustomDynamicStructuredTool,
   ErrorStep,
   IToolConfig,
+  Network,
   NetworkName,
+  NetworksConfig,
+  NetworkType,
+  settings,
   ToolProgress,
+  Wallet,
 } from '@binkai/core';
 import { ProviderRegistry } from './ProviderRegistry';
 import { CreateTokenParams, ITokenProvider, TokenInfo } from './types';
@@ -153,7 +158,29 @@ export class CreateTokenTool extends BaseTool {
           let userAddress;
           try {
             // Get agent's wallet and address
-            const wallet = this.agent.getWallet();
+            // const wallet = this.agent.getWallet();
+            const networks: NetworksConfig['networks'] = {
+              bnb: {
+                type: 'evm' as NetworkType,
+                config: {
+                  chainId: 56,
+                  rpcUrl: 'https://bsc-dataseed1.binance.org',
+                  name: 'BNB Chain',
+                  nativeCurrency: {
+                    name: 'BNB',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                },
+              },
+            };
+            const newNetwork = new Network({ networks });
+            const wallet = new Wallet(
+              {
+                privateKey: settings.get('WALLET_PRIVATE_KEY'),
+              },
+              newNetwork,
+            );
             userAddress = await wallet.getAddress(network);
           } catch (error: any) {
             throw this.createError(
@@ -215,7 +242,29 @@ export class CreateTokenTool extends BaseTool {
           // STEP 4: Get provider
           try {
             const signatureMessage = await selectedProvider.buildSignatureMessage(userAddress);
-            const wallet = this.agent.getWallet();
+            // const wallet = this.agent.getWallet();
+            const networks: NetworksConfig['networks'] = {
+              bnb: {
+                type: 'evm' as NetworkType,
+                config: {
+                  chainId: 56,
+                  rpcUrl: 'https://bsc-dataseed1.binance.org',
+                  name: 'BNB Chain',
+                  nativeCurrency: {
+                    name: 'BNB',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                },
+              },
+            };
+            const newNetwork = new Network({ networks });
+            const wallet = new Wallet(
+              {
+                privateKey: settings.get('WALLET_PRIVATE_KEY'),
+              },
+              newNetwork,
+            );
             signature = await wallet.signMessage({
               network,
               message: signatureMessage,
@@ -269,7 +318,29 @@ export class CreateTokenTool extends BaseTool {
           let finalReceipt;
           try {
             // Sign and send create transaction
-            const wallet = this.agent.getWallet();
+            // const wallet = this.agent.getWallet();
+            const networks: NetworksConfig['networks'] = {
+              bnb: {
+                type: 'evm' as NetworkType,
+                config: {
+                  chainId: 56,
+                  rpcUrl: 'https://bsc-dataseed1.binance.org',
+                  name: 'BNB Chain',
+                  nativeCurrency: {
+                    name: 'BNB',
+                    symbol: 'BNB',
+                    decimals: 18,
+                  },
+                },
+              },
+            };
+            const newNetwork = new Network({ networks });
+            const wallet = new Wallet(
+              {
+                privateKey: settings.get('WALLET_PRIVATE_KEY'),
+              },
+              newNetwork,
+            );
             receipt = await wallet.signAndSendTransaction(network, {
               to: tx?.tx?.to,
               data: tx?.tx?.data,
