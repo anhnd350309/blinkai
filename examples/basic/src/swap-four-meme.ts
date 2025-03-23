@@ -131,5 +131,5 @@ export async function swapFourMeme(twitterHandle: string, request: string): Prom
 }
 
 // (async () => {
-//   await swapFourMeme('sakura', 'Buy 100 SAFUFOUR on FourMeme bnb chain with 10 % slippage. Use the following token addresses: SAFUFOUR: 0xcf4eef00d87488d523de9c54bf1ba3166532ddb0');
+//   await swapFourMeme('testHandle', 'Buy 0.0002 BNB to SAFUFOUR on FourMeme bnb chain with 10 % slippage. Use the following token addresses: SAFUFOUR: 0xcf4eef00d87488d523de9c54bf1ba3166532ddb0');
 // })();

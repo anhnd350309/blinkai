@@ -10,16 +10,17 @@ import {
 import { TokenPlugin } from '@binkai/token-plugin';
 import { ethers } from 'ethers';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
-import { BirdeyeProvider } from '@binkai/birdeye-provider';
 import { getOrCreateWallet } from './twitter-db';
-
+import { SwapPlugin } from '@binkai/swap-plugin';
+import { WalletPlugin } from '@binkai/wallet-plugin';
+import { BnbProvider } from '@binkai/rpc-provider';
+import { BirdeyeProvider } from '@binkai/birdeye-provider';
+import { swapFourMeme } from './swap-four-meme';
 // Hardcoded RPC URLs for demonstration
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
 
-async function main() {
-  console.log('🚀 Starting BinkOS token info example...\n');
-
+export async function agentFunction(twitterHandle: string, request: string): Promise<string> {
   // Check required environment variables
   if (!settings.has('OPENAI_API_KEY')) {
     console.error('❌ Error: Please set OPENAI_API_KEY in your .env file');
@@ -71,7 +72,6 @@ async function main() {
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
-  const twitterHandle = 'testHandle';
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
@@ -93,7 +93,7 @@ async function main() {
   console.log('🤖 Initializing AI agent...');
   const agent = new Agent(
     {
-      model: 'gpt-4',
+      model: 'gpt-4o',
       temperature: 0,
     },
     wallet,
@@ -111,6 +111,8 @@ async function main() {
   const birdeye = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
+
+  // TOKEN PLUGIN
   // Configure the plugin with supported chains
   await tokenPlugin.initialize({
     defaultChain: 'bnb',
@@ -122,29 +124,58 @@ async function main() {
   // Register the plugin with the agent
   console.log('🔌 Registering token plugin with agent...');
   await agent.registerPlugin(tokenPlugin);
-  console.log('✓ Plugin registered\n');
+  console.log('✓ Token Plugin registered\n');
 
-  // Example 1: Create a token on BSC
-  console.log('💎 Example 1: Create a token on BSC');
-  const result = await agent.execute({
-    input:
-      'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.',
+  // SWAP PLUGIN
+  console.log('🔄 Initializing swap plugin...');
+  const swapPlugin = new SwapPlugin();
+
+  // Configure the plugin with supported chains
+  await swapPlugin.initialize({
+    defaultSlippage: 0.5,
+    defaultChain: 'bnb',
+    providers: [fourMeme],
+    supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
   });
-  console.log('✓ Token created:', result, '\n');
-  // Get plugin information
-  const registeredPlugin = agent.getPlugin('token') as TokenPlugin;
+  console.log('✓ Swap plugin initialized\n');
 
-  // Check available providers for each chain
-  console.log('📊 Available providers by chain:');
-  const chains = registeredPlugin.getSupportedNetworks();
-  for (const chain of chains) {
-    const providers = registeredPlugin.getProvidersForNetwork(chain);
-    console.log(`Chain ${chain}:`, providers.map(p => p.getName()).join(', '));
-  }
-  console.log();
+  // Register the plugin with the agent
+  console.log('🔌 Registering swap plugin with agent...');
+  await agent.registerPlugin(swapPlugin);
+  console.log('✓ Swap Plugin registered\n');
+
+  // WALLET PLUGIN
+  console.log('🔄 Initializing wallet plugin...');
+  const walletPlugin = new WalletPlugin();
+  const bnbProvider = new BnbProvider({
+    rpcUrl: BNB_RPC,
+  });
+  const birdeyeProvider = new BirdeyeProvider({
+    apiKey: settings.get('BIRDEYE_API_KEY'),
+  });
+
+  // Configure the plugin with supported chains
+  await walletPlugin.initialize({
+    defaultChain: 'bnb',
+    providers: [bnbProvider, birdeyeProvider],
+    supportedChains: ['bnb'],
+  });
+  console.log('✓ Wallet plugin initialized\n');
+
+  // Register the plugin with the agent
+  console.log('🔌 Registering wallet plugin with agent...');
+  await agent.registerPlugin(walletPlugin);
+  console.log('✓ Wallet Plugin registered\n');
+
+  // Agent execute
+  console.log('💱 Executing user request...');
+  const result = await agent.execute({
+    input: request,
+  });
+  console.log('✓ User request executed:', result);
+  return result;
 }
 
-// main().catch(error => {
-//   console.error('❌ Error:', error.message);
-//   process.exit(1);
-// });
+// (async () => {
+//     await agentFunction('testHandle', 'transfer 0.0001 BNB to 0xC1b1729127E4029174F183aB51a4B10c58Dc006d');
+// })();
