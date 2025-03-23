@@ -8,11 +8,7 @@ export interface WalletInfo {
 }
 
 interface DatabaseConfig {
-  host: string;
-  port: number;
-  user: string;
-  password: string;
-  database: string;
+  uri: string;
   waitForConnections: boolean;
   connectionLimit: number;
   queueLimit: number;
@@ -20,11 +16,7 @@ interface DatabaseConfig {
 
 export async function getOrCreateWallet(twitterHandle: string): Promise<WalletInfo | null> {
   const pool = mysql.createPool({
-    host: settings.get('DB_HOST') as string,
-    port: Number(settings.get('DB_PORT')),
-    user: settings.get('DB_USER') as string,
-    password: settings.get('DB_PASSWORD') as string,
-    database: settings.get('DB_NAME') as string,
+    uri: settings.get('MYSQL_URL') as string,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
