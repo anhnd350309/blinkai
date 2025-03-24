@@ -19,7 +19,6 @@ import { PostgresDatabaseAdapter } from '@binkai/postgres-adapter';
 import { PancakeSwapProvider } from '@binkai/pancakeswap-provider';
 import { KyberProvider } from '@binkai/kyber-provider';
 // Hardcoded RPC URLs for demonstration
-const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
 
 export async function agentFunction(twitterHandle: string, request: string): Promise<string> {
@@ -39,18 +38,6 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Define available networks
   console.log('📡 Configuring networks...');
   const networks: NetworksConfig['networks'] = {
-    solana: {
-      type: 'solana' as NetworkType,
-      config: {
-        rpcUrl: SOLANA_RPC,
-        name: 'Solana',
-        nativeCurrency: {
-          name: 'Solana',
-          symbol: 'SOL',
-          decimals: 9,
-        },
-      },
-    },
     bnb: {
       type: 'evm' as NetworkType,
       config: {
@@ -88,7 +75,6 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   );
   console.log('✓ Wallet created\n');
 
-  console.log('🤖 Wallet Solana:', await wallet.getAddress(NetworkName.SOLANA));
   console.log('🤖 Wallet BNB:', await wallet.getAddress(NetworkName.BNB));
 
   // Create an agent with OpenAI

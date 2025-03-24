@@ -184,8 +184,11 @@ export class GetWalletBalanceTool extends BaseTool {
                 });
               }
 
-              // Add results to finalResults if there are any tokens remaining
-              if (Object.keys(results).length > 0 && results.tokens && results.tokens.length > 0) {
+              // Add results to finalResults if there are any tokens remaining or native balance
+              if (
+                Object.keys(results).length > 0 &&
+                ((results.tokens && results.tokens.length > 0) || results.nativeBalance)
+              ) {
                 // Ensure results has data and tokens is a non-empty array
                 finalResults[network] = {
                   data: results,
