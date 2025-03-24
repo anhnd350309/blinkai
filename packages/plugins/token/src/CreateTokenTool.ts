@@ -72,7 +72,7 @@ export class CreateTokenTool extends BaseTool {
   getDescription(): string {
     const providers = this.registry.getProviderNames().join(', ');
     const networks = Array.from(this.supportedNetworks).join(', ');
-    return `Create token blockchain with name, symbol, description using various providers (${providers}). Supports networks: ${networks}.`;
+    return `Create (or deploy) token blockchain with name, symbol, description using various providers (${providers}). Supports networks: ${networks}.`;
   }
 
   private getSupportedNetworks(): NetworkName[] {
