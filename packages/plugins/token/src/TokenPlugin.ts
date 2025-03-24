@@ -36,9 +36,9 @@ export class TokenPlugin extends BasePlugin {
     });
 
     // Configure create token tool
-    this.createTokenTool = new CreateTokenTool({
-      supportedNetworks: Array.from(this.supportedNetworks),
-    });
+    // this.createTokenTool = new CreateTokenTool({
+    //   supportedNetworks: Array.from(this.supportedNetworks),
+    // });
 
     // Register providers if provided in config
     if (config.providers) {
@@ -50,7 +50,8 @@ export class TokenPlugin extends BasePlugin {
 
   getTools(): BaseTool[] {
     // return [this.tokenTool as unknown as BaseTool, this.createTokenTool as unknown as BaseTool];
-    return [this.createTokenTool as unknown as BaseTool, this.tokenTool as unknown as BaseTool];
+    // return [this.createTokenTool as unknown as BaseTool, this.tokenTool as unknown as BaseTool];
+    return [this.tokenTool as unknown as BaseTool];
   }
 
   /**
@@ -59,7 +60,7 @@ export class TokenPlugin extends BasePlugin {
   registerProvider(provider: ITokenProvider): void {
     this.registry.registerProvider(provider);
     this.tokenTool.registerProvider(provider);
-    this.createTokenTool.registerProvider(provider);
+    // this.createTokenTool.registerProvider(provider);
 
     // Add provider's supported networks
     provider.getSupportedNetworks().forEach(network => {
