@@ -17,6 +17,7 @@ import { BnbProvider } from '@binkai/rpc-provider';
 import { BirdeyeProvider } from '@binkai/birdeye-provider';
 import { PostgresDatabaseAdapter } from '@binkai/postgres-adapter';
 import { PancakeSwapProvider } from '@binkai/pancakeswap-provider';
+import { KyberProvider } from '@binkai/kyber-provider';
 // Hardcoded RPC URLs for demonstration
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
@@ -118,6 +119,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   const fourMeme = new FourMemeProvider(provider, 56);
   const pancakeswap = new PancakeSwapProvider(provider, 56);
+  const kyber = new KyberProvider(provider, 56);
   const birdeye = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
@@ -142,9 +144,9 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // Configure the plugin with supported chains
   await swapPlugin.initialize({
-    defaultSlippage: 0.5,
+    defaultSlippage: 5,
     defaultChain: 'bnb',
-    providers: [pancakeswap],
+    providers: [kyber],
     supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
   });
   console.log('✓ Swap plugin initialized\n');
@@ -167,7 +169,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Configure the plugin with supported chains
   await walletPlugin.initialize({
     defaultChain: 'bnb',
-    providers: [bnbProvider, birdeyeProvider],
+    providers: [bnbProvider],
     supportedChains: ['bnb'],
   });
   console.log('✓ Wallet plugin initialized\n');
