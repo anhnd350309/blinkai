@@ -128,7 +128,7 @@ async function main() {
   console.log('💎 Example 1: Create a token on BSC');
   const result = await agent.execute({
     input:
-      'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.',
+      'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://wibu.com.vn/wp-content/uploads/2024/04/Uchiha-Itachi.png.',
   });
   console.log('✓ Token created:', result, '\n');
   // Get plugin information
@@ -144,7 +144,7 @@ async function main() {
   console.log();
 }
 
-// main().catch(error => {
-//   console.error('❌ Error:', error.message);
-//   process.exit(1);
-// });
+main().catch(error => {
+  console.error('❌ Error:', error.message);
+  process.exit(1);
+});

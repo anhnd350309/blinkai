@@ -11,6 +11,7 @@ import {
 import { SwapPlugin } from '@binkai/swap-plugin';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
 import { getOrCreateWallet } from './twitter-db';
+import { PancakeSwapProvider } from '@binkai/pancakeswap-provider';
 
 // Hardcoded RPC URLs for demonstration
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
@@ -107,13 +108,14 @@ export async function swapFourMeme(twitterHandle: string, request: string): Prom
 
   // Create providers with proper chain IDs
   const fourMeme = new FourMemeProvider(provider, 56);
+  const pancakeswap = new PancakeSwapProvider(provider, 56);
 
   // Configure the plugin with supported chains
   await swapPlugin.initialize({
     defaultSlippage: 0.5,
     defaultChain: 'bnb',
-    providers: [fourMeme],
-    supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
+    providers: [fourMeme, pancakeswap],
+    supportedChains: ['bnb'], // These will be intersected with agent's networks
   });
   console.log('✓ Swap plugin initialized\n');
 
