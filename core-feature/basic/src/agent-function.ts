@@ -117,6 +117,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   const provider = new ethers.JsonRpcProvider(BNB_RPC);
 
   const fourMeme = new FourMemeProvider(provider, 56);
+  const pancakeswap = new PancakeSwapProvider(provider, 56);
   const birdeye = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
@@ -139,13 +140,11 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   console.log('🔄 Initializing swap plugin...');
   const swapPlugin = new SwapPlugin();
 
-  const pancakeswap = new PancakeSwapProvider(provider, 56);
-
   // Configure the plugin with supported chains
   await swapPlugin.initialize({
     defaultSlippage: 0.5,
     defaultChain: 'bnb',
-    providers: [fourMeme, pancakeswap],
+    providers: [pancakeswap],
     supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
   });
   console.log('✓ Swap plugin initialized\n');
