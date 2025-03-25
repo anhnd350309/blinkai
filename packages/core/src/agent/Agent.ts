@@ -163,7 +163,7 @@ export class Agent extends BaseAgent {
     When error occurs, describe the error in shortest way.
     Ask users if your understanding is correct and if you need to change anything in the process you have done.
     Respond to the question without inserting blank lines between paragraphs. Ensure all content is written continuously, only breaking lines when necessary.
-    In case you swap tokens, after succes return the status, amount, address of the token you swapped from and swapped to and the link of the transaction with this format: "https://bscscan.com/tx/"{{transaction_hash}}.
+    In case you swap tokens, after success return the status, amount, address of the token you swapped from and swapped to and the link of the transaction with this format: "https://bscscan.com/tx/"{{transaction_hash}}.
     In case you transfer tokens, after success return the status, and the link of the transaction.
     In case user wants to transfer or swap (only work on this two cases) and the transaction is failed, report the error and add this to your response: 
     "Your wallet address is ${wallet_address}. Make sure it has enough funds to process."(Remember, this case does not apply when you deploy token(or create token))
