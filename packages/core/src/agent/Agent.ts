@@ -157,8 +157,14 @@ export class Agent extends BaseAgent {
     - Solana: ${SOL_NATIVE_TOKEN_ADDRESS}
     Available networks include: ${Object.keys(this.networks).join(', ')}`;
 
-    const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'} and you use the project owner's wallet to pay gas fee for deploying token(just deploy token, not transfer or swap).
+    const toolNames = this.getTools()
+      .map(tool => tool.getName())
+      .join(', ');
+    console.log('Available tools:', toolNames);
+
+    const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'}.
      You can help users interact with BNB smart chain. 
+     You have the following tools: ${toolNames}. Any requests not related to those tools are not allowed.
      First, you need to understand the user's request and then you need to choose the appropriate tool to execute the user's request.
     When error occurs, describe the error in shortest way.
     Ask users if your understanding is correct and if you need to change anything in the process you have done.
