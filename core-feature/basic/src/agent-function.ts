@@ -109,12 +109,15 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   const birdeye = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
+  const bnbProvider = new BnbProvider({
+    rpcUrl: BNB_RPC,
+  });
 
   // TOKEN PLUGIN
   // Configure the plugin with supported chains
   await tokenPlugin.initialize({
     defaultChain: 'bnb',
-    providers: [birdeye, fourMeme as any],
+    providers: [bnbProvider, fourMeme as any],
     supportedChains: ['bnb'],
   });
   console.log('✓ Token plugin initialized\n');
@@ -145,9 +148,6 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // WALLET PLUGIN
   console.log('🔄 Initializing wallet plugin...');
   const walletPlugin = new WalletPlugin();
-  const bnbProvider = new BnbProvider({
-    rpcUrl: BNB_RPC,
-  });
   const birdeyeProvider = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
