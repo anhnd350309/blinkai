@@ -446,7 +446,7 @@ export class FourMemeProvider extends BaseSwapProvider {
   }
 
   private uploadImageUrl(): string {
-    return 'https://static.four.meme/market/b4bac6f5-6d76-45dc-ae35-0c6027bbb5c315315689909239562295.png';
+    return 'https://static.four.meme/market/2dc508e9-783b-4154-936d-f7086d4edd7518401375550107273715.png';
   }
   /**
    * Calls the Four Meme API to create a token and get the createArg
