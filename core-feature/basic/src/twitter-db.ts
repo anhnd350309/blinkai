@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { ethers } from 'ethers';
+import { Keypair } from '@solana/web3.js';
 import { settings } from '@binkai/core';
 
 export interface WalletInfo {
@@ -47,9 +48,10 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     // If doesn't exist, create a new wallet
     // @TODO: Create BNB wallet
-    const wallet = ethers.Wallet.createRandom();
-    const privateKey = wallet.privateKey;
-    const publicKey = wallet.address;
+    const wallet = Keypair.generate();
+    const secretKey = wallet.secretKey;
+    const privateKey = Buffer.from(secretKey).toString('base64');
+    const publicKey = wallet.publicKey.toBase58();
 
     console.log(`🤖 Create new wallet: ${twitterHandle}`);
     console.log(`🤖 Private Key: ${privateKey}`);

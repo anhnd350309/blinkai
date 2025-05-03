@@ -20,6 +20,7 @@ import { PancakeSwapProvider } from '@binkai/pancakeswap-provider';
 import { KyberProvider } from '@binkai/kyber-provider';
 // Hardcoded RPC URLs for demonstration
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
+const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
 
 export async function agentFunction(twitterHandle: string, request: string): Promise<string> {
   // Check required environment variables
@@ -38,16 +39,15 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Define available networks
   console.log('📡 Configuring networks...');
   const networks: NetworksConfig['networks'] = {
-    bnb: {
-      type: 'evm' as NetworkType,
+    solana: {
+      type: 'solana' as NetworkType,
       config: {
-        chainId: 56,
-        rpcUrl: BNB_RPC,
-        name: 'BNB Chain',
+        rpcUrl: SOLANA_RPC,
+        name: 'Solana',
         nativeCurrency: {
-          name: 'BNB',
-          symbol: 'BNB',
-          decimals: 18,
+          name: 'Solana',
+          symbol: 'SOL',
+          decimals: 9,
         },
       },
     },
@@ -65,9 +65,6 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   const privateKey = walletInfo?.privateKey;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
       privateKey,
       index: 0,
     },
@@ -75,7 +72,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   );
   console.log('✓ Wallet created\n');
 
-  console.log('🤖 Wallet BNB:', await wallet.getAddress(NetworkName.BNB));
+  console.log('🤖 Wallet Solana:', await wallet.getAddress(NetworkName.SOLANA));
 
   // Create an agent with OpenAI
   console.log('🤖 Initializing AI agent...');
@@ -148,9 +145,6 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // WALLET PLUGIN
   console.log('🔄 Initializing wallet plugin...');
   const walletPlugin = new WalletPlugin();
-  const birdeyeProvider = new BirdeyeProvider({
-    apiKey: settings.get('BIRDEYE_API_KEY'),
-  });
 
   // Configure the plugin with supported chains
   await walletPlugin.initialize({
