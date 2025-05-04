@@ -1,10 +1,10 @@
 import mysql from 'mysql2/promise';
-import { ethers } from 'ethers';
 import { Keypair } from '@solana/web3.js';
 import { settings } from '@binkai/core';
+import * as bip39 from 'bip39';
 
 export interface WalletInfo {
-  privateKey: string;
+  seedPhrase: string;
   publicKey: string;
 }
 
@@ -32,39 +32,38 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     // Check if user handle exists
     const [rows] = await connection.execute<mysql.RowDataPacket[]>(
-      'SELECT private_key, public_key FROM users WHERE twitter_handle = ?',
+      'SELECT seed_phrase, public_key FROM users WHERE twitter_handle = ?',
       [twitterHandle],
     );
 
     if (rows.length > 0) {
       console.log('✓ User wallet found in database');
-      console.log(`Private Key: ${rows[0].private_key}`);
+      console.log(`Seed Phrase: ${rows[0].seed_phrase}`);
       console.log(`Public Key: ${rows[0].public_key}`);
       return {
-        privateKey: rows[0].private_key,
+        seedPhrase: rows[0].seed_phrase,
         publicKey: rows[0].public_key,
       };
     }
 
     // If doesn't exist, create a new wallet
-    // @TODO: Create BNB wallet
-    const wallet = Keypair.generate();
-    const secretKey = wallet.secretKey;
-    const privateKey = Buffer.from(secretKey).toString('base64');
-    const publicKey = wallet.publicKey.toBase58();
+    const seedPhrase = bip39.generateMnemonic();
+    const seed = await bip39.mnemonicToSeed(seedPhrase);
+    const keypair = Keypair.fromSeed(seed.slice(0, 32));
+    const publicKey = keypair.publicKey.toBase58();
 
     console.log(`🤖 Create new wallet: ${twitterHandle}`);
-    console.log(`🤖 Private Key: ${privateKey}`);
+    console.log(`🤖 Seed Phrase: ${seedPhrase}`);
     console.log(`🤖 Public Key: ${publicKey}`);
 
     console.log(`🤖 Save wallet info to database...`);
     await connection.execute(
-      'INSERT INTO users (twitter_handle, private_key, public_key) VALUES (?, ?, ?)',
-      [twitterHandle, privateKey, publicKey],
+      'INSERT INTO users (twitter_handle, seed_phrase, public_key) VALUES (?, ?, ?)',
+      [twitterHandle, seedPhrase, publicKey],
     );
     console.log(`🤖 Wallet info saved to database`);
 
-    return { privateKey, publicKey };
+    return { seedPhrase, publicKey };
   } catch (error) {
     console.error('❌Error: ', error);
     return null;

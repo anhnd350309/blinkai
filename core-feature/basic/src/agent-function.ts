@@ -62,10 +62,10 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
   const wallet = new Wallet(
     {
-      privateKey,
+      seedPhrase,
       index: 0,
     },
     network,

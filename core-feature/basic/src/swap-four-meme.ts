@@ -73,13 +73,10 @@ export async function swapFourMeme(twitterHandle: string, request: string): Prom
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
-      privateKey,
+      seedPhrase,
       index: 0,
     },
     network,
