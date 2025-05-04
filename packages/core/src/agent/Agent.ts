@@ -79,10 +79,14 @@ export class Agent extends BaseAgent {
 
   // initialize all plugins at once with all tools in the plugins
   async registerListPlugins(plugins: IPlugin[]): Promise<void> {
+    console.log(plugins);
     for (const plugin of plugins) {
       const pluginName = plugin.getName();
+      console.log(pluginName);
       this.plugins.set(pluginName, plugin);
+      console.log('set sucess');
       const tools = plugin.getTools();
+
       for (const tool of tools) {
         await this.registerTool(tool);
       }
@@ -135,7 +139,7 @@ export class Agent extends BaseAgent {
     if (this.db) {
       const networkNames = Object.keys(this.networks);
       if (networkNames.length) {
-        const defaultNetwork = NetworkName.BNB;
+        const defaultNetwork = NetworkName.SOLANA;
         const address = await this.wallet?.getAddress(defaultNetwork);
         if (!address) throw new Error('Not found wallet address');
         const user = await this.db.createAndGetUserByAddress({ address });
@@ -146,7 +150,7 @@ export class Agent extends BaseAgent {
   }
 
   private async createExecutor(): Promise<AgentExecutor> {
-    const wallet_address = await this.wallet?.getAddress(NetworkName.BNB);
+    const wallet_address = await this.wallet?.getAddress(NetworkName.SOLANA);
     console.log('wallet_address', wallet_address);
     const requiredPrompt = `
     Native token address: 
