@@ -63,6 +63,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const privateKey = walletInfo?.privateKey;
+  console.log(privateKey);
   const wallet = new Wallet(
     {
       privateKey,
