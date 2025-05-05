@@ -2,7 +2,7 @@ import { BasePlugin, IPluginConfig, BaseTool, NetworkName, IAgent } from '@binka
 import { GetTokenInfoTool } from './TokenTool';
 import { ITokenProvider, TokenInfo } from './types';
 import { ProviderRegistry } from './ProviderRegistry';
-import { CreateTokenTool } from './CreateTokenTool';
+import { CreateTokenTool } from './CreateTokenTool_v2';
 export interface TokenPluginConfig extends IPluginConfig {
   providers?: ITokenProvider[];
   supportedNetworks?: NetworkName[];
