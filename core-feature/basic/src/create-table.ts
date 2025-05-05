@@ -18,7 +18,7 @@ export async function createUserTable(): Promise<void> {
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         twitter_handle VARCHAR(255) NOT NULL UNIQUE,
-        private_key VARCHAR(255) NOT NULL,
+        seed_phrase VARCHAR(255) NOT NULL,
         public_key VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
