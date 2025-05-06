@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import { Keypair } from '@solana/web3.js';
 import { settings } from '@binkai/core';
 import * as bip39 from 'bip39';
+import bs58 from 'bs58';
 
 export interface WalletInfo {
   seedPhrase: string;
@@ -51,6 +52,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
     const seed = await bip39.mnemonicToSeed(seedPhrase);
     const keypair = Keypair.fromSeed(seed.slice(0, 32));
     const publicKey = keypair.publicKey.toBase58();
+    const secretKey = bs58.encode(keypair.secretKey);
 
     console.log(`🤖 Create new wallet: ${twitterHandle}`);
     console.log(`🤖 Seed Phrase: ${seedPhrase}`);

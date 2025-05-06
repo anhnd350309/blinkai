@@ -3,7 +3,7 @@ import { agentFunction } from './agent-function';
 
 const agentFunctionHandler = async () => {
   const twitterHandle = '1722551467192860673';
-  const request = 'deploy token name: BONKK, symbol: BONKKKK, image: ';
+  const request = 'deploy token name: BONKK, symbol: BONKKKK, image: https://bonk.fun/brawl.png';
   console.log('twitterHandle', twitterHandle);
   console.log('request', request);
   const result = await agentFunction(twitterHandle, request);
