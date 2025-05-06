@@ -9,7 +9,7 @@ import {
   ErrorStep,
 } from '@binkai/core';
 import { ProviderRegistry } from './ProviderRegistry';
-import { ISwapProvider, SwapQuote, SwapParams } from './types';
+import { ISwapProvider, SwapQuote, SwapParams, tokenAddress } from './types';
 import { validateTokenAddress } from './utils/addressValidation';
 import { parseTokenAmount } from './utils/tokenUtils';
 import { isSolanaNetwork } from './utils/networkUtils';
@@ -44,7 +44,7 @@ export class SwapTool extends BaseTool {
   }
 
   getName(): string {
-    return 'swap';
+    return 'Buy Token';
   }
 
   getDescription(): string {
@@ -96,33 +96,8 @@ export class SwapTool extends BaseTool {
     }
 
     return z.object({
-      fromToken: z.string().describe(`The adress of source token on network. (spend)`),
-      toToken: z.string().describe(`The adress of destination token on network. (receive)`),
-      amount: z.string().describe('The amount of tokens to swap'),
-      amountType: z
-        .enum(['input', 'output'])
-        .describe('Whether the amount is input (spend) or output (receive)'),
-      network: z.enum([
-        'bnb',
-        'solana',
-        'ethereum',
-        'arbitrum',
-        'base',
-        'optimism',
-        'polygon',
-        'null',
-      ]).describe(`Determine blockchain network from user input. 
-        Priority rules:
-          1. Use explicitly mentioned network
-          2. Infer from native tokens (ETH→Ethereum, SOL→Solana)
-          3. For cross-chain mentions, determine main network
-          4. Return null if no network detected`),
-      provider: z
-        .enum(providers as [string, ...string[]])
-        .optional()
-        .describe(
-          'The DEX provider to use for the swap. If not specified, the best rate will be found',
-        ),
+      token_address: z.string().describe(`The adress of token user want to buy`),
+      amount_sol: z.string().describe('The amount of tokens user want to spend to buy other token'),
       slippage: z
         .number()
         .optional()

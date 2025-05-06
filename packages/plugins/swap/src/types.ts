@@ -28,6 +28,12 @@ export interface SwapParams {
   slippage: number;
 }
 
+export const tokenAddress = {
+  BTC: '123',
+  ETH: '345',
+  USDC: '567',
+};
+
 export interface Transaction {
   to: string;
   data: string;
