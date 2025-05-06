@@ -101,7 +101,7 @@ export class SwapTool extends BaseTool {
       token_address: z
         .string()
         .optional()
-        .describe(`The adress of token or name of token(just USDC in this case) user want to buy`),
+        .describe(`The adress of token or name of token user want to buy`),
       amount_sol: z.number().describe('The amount of tokens user want to spend to buy other token'),
       slippage: z
         .number()
@@ -128,7 +128,7 @@ export class SwapTool extends BaseTool {
           console.log('🤖 Swap Args:', args);
           const keypair = this.secretKey;
           if (tokenName && tokenAddressDict[tokenName.toUpperCase()] === undefined) {
-            return `token ${tokenName} is strange, please provide address of this token`;
+            return `Do not have token address of ${tokenName}, please provide address of this token`;
           }
 
           let payload;
@@ -151,9 +151,9 @@ export class SwapTool extends BaseTool {
           }
           console.log(payload);
           const response = await axios.post(
-            settings.get('BUY_TOKEN_ENDPOINT') ||
+            settings.get('BASE_URL') + '/buy-token' ||
               (() => {
-                throw new Error('BUY_TOKEN_ENDPOINT is not defined in settings');
+                throw new Error('BASE_URL is not defined in settings');
               })(),
             payload,
           );
