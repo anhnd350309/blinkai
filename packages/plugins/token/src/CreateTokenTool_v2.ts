@@ -133,9 +133,9 @@ export class CreateTokenTool extends BaseTool {
           console.log('🤖 Create token Args:############', args);
           try {
             const response = await axios.post(
-              settings.get('LAUNCH_TOKEN_ENDPOINT') ||
+              settings.get('BASE_URL') + '/launch-token' ||
                 (() => {
-                  throw new Error('LAUNCH_TOKEN_ENDPOINT is not defined');
+                  throw new Error('BASE_URL is not defined');
                 })(),
               payload,
             );
@@ -145,7 +145,7 @@ export class CreateTokenTool extends BaseTool {
             const pool_state = server_response.pool_state;
             const uri = server_response.uri;
             const image_url = server_response.image_url;
-            return `Successfull in launch token with this information: 
+            return `Launch token finish with response: ${response.data} this information: 
                       server_response:${server_response}, 
                       mint_address: https://letsbonk.fun/token/${mint_address}, 
                       pool_state: ${pool_state},  
