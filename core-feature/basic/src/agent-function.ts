@@ -63,6 +63,7 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
   const seedPhrase = walletInfo?.seedPhrase;
+  const secretKey = walletInfo?.secretKey;
   const wallet = new Wallet(
     {
       seedPhrase: seedPhrase,
@@ -126,21 +127,24 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // SWAP PLUGIN
   console.log('🔄 Initializing swap plugin...');
-  const swapPlugin = new SwapPlugin();
+  if (!secretKey) {
+    throw new Error('❌ Error: secretKey is undefined. Cannot initialize SwapPlugin.');
+  }
+  const swapPlugin = new SwapPlugin(secretKey);
 
   // Configure the plugin with supported chains
-  // await swapPlugin.initialize({
-  //   defaultSlippage: 5,
-  //   defaultChain: 'bnb',
-  //   providers: [kyber],
-  //   supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
-  // });
-  // console.log('✓ Swap plugin initialized\n');
+  await swapPlugin.initialize({
+    defaultSlippage: 5,
+    defaultChain: 'bnb',
+    providers: [kyber],
+    supportedChains: ['bnb', 'solana'], // These will be intersected with agent's networks
+  });
+  console.log('✓ Swap plugin initialized\n');
 
   // // Register the plugin with the agent
-  // console.log('🔌 Registering swap plugin with agent...');
-  // await agent.registerPlugin(swapPlugin);
-  // console.log('✓ Swap Plugin registered\n');
+  console.log('🔌 Registering swap plugin with agent...');
+  await agent.registerPlugin(swapPlugin);
+  console.log('✓ Swap Plugin registered\n');
 
   // // WALLET PLUGIN
   // console.log('🔄 Initializing wallet plugin...');

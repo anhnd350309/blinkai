@@ -169,9 +169,8 @@ export class Agent extends BaseAgent {
     Respond to the question without inserting blank lines between paragraphs. Ensure all content is written continuously, only breaking lines when necessary.
     In case you swap tokens, after success return the status, amount, address of the token you swapped from and swapped to and the link of the transaction with this format: "https://bscscan.com/tx/"{{transaction_hash}}.
     In case you transfer tokens, after success return the status, and the link of the transaction.
-    In case user wants to transfer or swap (only work on this two cases) and the transaction is failed, report the error and add this to your response: 
-    "Your wallet address is ${wallet_address}. Make sure it has enough funds to process."(Remember, this case does not apply when you deploy token(or create token))
-    In case user wants to create wallet, after success return the information: Name, Symbol, uri.
+    In case user wants to transfer or swap (only work on this two cases) and the transaction is failed, report the return of the tool.
+    In case user wants to create wallet, after success return the information: Name, Symbol, and mint address.
     Because of the policy of twitter, max output of length is 280 characters, so you must response to user in a as short as possible(less than 60 words)
     `;
     // console.log(this.config.systemPrompt ?? defaultSystemPrompt);

@@ -7,6 +7,7 @@ import bs58 from 'bs58';
 export interface WalletInfo {
   seedPhrase: string;
   publicKey: string;
+  secretKey: string;
 }
 
 interface DatabaseConfig {
@@ -33,7 +34,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     // Check if user handle exists
     const [rows] = await connection.execute<mysql.RowDataPacket[]>(
-      'SELECT seed_phrase, public_key FROM users WHERE twitter_handle = ?',
+      'SELECT seed_phrase, public_key, secret_key FROM users WHERE twitter_handle = ?',
       [twitterHandle],
     );
 
@@ -44,6 +45,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
       return {
         seedPhrase: rows[0].seed_phrase,
         publicKey: rows[0].public_key,
+        secretKey: rows[0].secret_key,
       };
     }
 
@@ -60,12 +62,12 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     console.log(`🤖 Save wallet info to database...`);
     await connection.execute(
-      'INSERT INTO users (twitter_handle, seed_phrase, public_key) VALUES (?, ?, ?)',
-      [twitterHandle, seedPhrase, publicKey],
+      'INSERT INTO users (twitter_handle, seed_phrase, public_key, secret_key) VALUES (?, ?, ?, ?)',
+      [twitterHandle, seedPhrase, publicKey, secretKey],
     );
     console.log(`🤖 Wallet info saved to database`);
 
-    return { seedPhrase, publicKey };
+    return { seedPhrase, publicKey, secretKey };
   } catch (error) {
     console.error('❌Error: ', error);
     return null;

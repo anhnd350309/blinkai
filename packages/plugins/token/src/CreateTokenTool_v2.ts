@@ -133,7 +133,10 @@ export class CreateTokenTool extends BaseTool {
           console.log('🤖 Create token Args:############', args);
           try {
             const response = await axios.post(
-              'https://letsbonkmcpserver-production.up.railway.app/launch-token',
+              settings.get('LAUNCH_TOKEN_ENDPOINT') ||
+                (() => {
+                  throw new Error('LAUNCH_TOKEN_ENDPOINT is not defined');
+                })(),
               payload,
             );
             console.log('🤖 Token created:', response.data);
@@ -144,9 +147,8 @@ export class CreateTokenTool extends BaseTool {
             const image_url = server_response.image_url;
             return `Successfull in launch token with this information: 
                       server_response:${server_response}, 
-                      mint_address: ${mint_address}, 
-                      pool_state: ${pool_state}, 
-                      uri: ${uri}, 
+                      mint_address: https://letsbonk.fun/token/${mint_address}, 
+                      pool_state: ${pool_state},  
                       image_url: ${image_url}`;
           } catch (error) {
             console.error('Error creating token:', error);
