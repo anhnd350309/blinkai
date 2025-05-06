@@ -2,10 +2,12 @@ import mysql from 'mysql2/promise';
 import { Keypair } from '@solana/web3.js';
 import { settings } from '@binkai/core';
 import * as bip39 from 'bip39';
+import bs58 from 'bs58';
 
 export interface WalletInfo {
   seedPhrase: string;
   publicKey: string;
+  secretKey: string;
 }
 
 interface DatabaseConfig {
@@ -32,7 +34,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     // Check if user handle exists
     const [rows] = await connection.execute<mysql.RowDataPacket[]>(
-      'SELECT seed_phrase, public_key FROM users WHERE twitter_handle = ?',
+      'SELECT seed_phrase, public_key, secret_key FROM users WHERE twitter_handle = ?',
       [twitterHandle],
     );
 
@@ -43,6 +45,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
       return {
         seedPhrase: rows[0].seed_phrase,
         publicKey: rows[0].public_key,
+        secretKey: rows[0].secret_key,
       };
     }
 
@@ -51,6 +54,7 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
     const seed = await bip39.mnemonicToSeed(seedPhrase);
     const keypair = Keypair.fromSeed(seed.slice(0, 32));
     const publicKey = keypair.publicKey.toBase58();
+    const secretKey = bs58.encode(keypair.secretKey);
 
     console.log(`🤖 Create new wallet: ${twitterHandle}`);
     console.log(`🤖 Seed Phrase: ${seedPhrase}`);
@@ -58,12 +62,12 @@ export async function getOrCreateWallet(twitterHandle: string): Promise<WalletIn
 
     console.log(`🤖 Save wallet info to database...`);
     await connection.execute(
-      'INSERT INTO users (twitter_handle, seed_phrase, public_key) VALUES (?, ?, ?)',
-      [twitterHandle, seedPhrase, publicKey],
+      'INSERT INTO users (twitter_handle, seed_phrase, public_key, secret_key) VALUES (?, ?, ?, ?)',
+      [twitterHandle, seedPhrase, publicKey, secretKey],
     );
     console.log(`🤖 Wallet info saved to database`);
 
-    return { seedPhrase, publicKey };
+    return { seedPhrase, publicKey, secretKey };
   } catch (error) {
     console.error('❌Error: ', error);
     return null;
