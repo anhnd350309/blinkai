@@ -123,11 +123,16 @@ export class SwapTool extends BaseTool {
         onProgress?: (data: ToolProgress) => void,
       ) => {
         try {
-          const { tokenName, tokenAddress, amount_sol, slippage } = args;
-          console.log('🔄 Doing swap operation...');
+          const { tokenName, token_address: tokenAddress, amount_sol, slippage } = args;
+          console.log('🔄 Doing swap operation SwapTool_V2...');
           console.log('🤖 Swap Args:', args);
           const keypair = this.secretKey;
-          if (tokenName && tokenAddressDict[tokenName.toUpperCase()] === undefined) {
+          console.log(
+            tokenName,
+            tokenName && tokenAddressDict[tokenName.toUpperCase()] === undefined,
+          );
+          if (tokenName !== undefined && tokenAddressDict[tokenName.toUpperCase()] === undefined) {
+            console.log('🤖 Token address not found in dictionary');
             return `Do not have token address of ${tokenName}, please provide address of this token`;
           }
 
@@ -147,9 +152,10 @@ export class SwapTool extends BaseTool {
               keypair,
             };
           } else {
-            return 'please provide token name or token addres.';
+            return 'please provide token name or token address.';
           }
-          console.log(payload);
+          console.log('🤖 Swap Payload:', payload);
+          console.log('This one', settings.get('BASE_URL'));
           const response = await axios.post(
             settings.get('BASE_URL') + '/buy-token' ||
               (() => {
@@ -157,6 +163,7 @@ export class SwapTool extends BaseTool {
               })(),
             payload,
           );
+          console.log('🤖 Swap response:', response);
           console.log('🤖 Token created:', response.data);
 
           return `Buy token with this information: 
