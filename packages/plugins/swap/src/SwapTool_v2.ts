@@ -126,7 +126,7 @@ export class SwapTool extends BaseTool {
           let { tokenName, token_address: tokenAddress, amount_sol, slippage } = args;
           console.log('🔄 Doing swap operation SwapTool_V2...');
           console.log('🤖 Swap Args:', args);
-          const keypair = this.secretKey;
+          let keypair = this.secretKey;
           console.log(
             tokenName,
             tokenName && tokenAddressDict[tokenName.toUpperCase()] === undefined,
@@ -167,7 +167,6 @@ export class SwapTool extends BaseTool {
               })(),
             payload,
           );
-          console.log('🤖 Swap response:', response);
           console.log('🤖 Token created:', response.data);
 
           if (response.data.code === 200) {
