@@ -79,10 +79,14 @@ export class Agent extends BaseAgent {
 
   // initialize all plugins at once with all tools in the plugins
   async registerListPlugins(plugins: IPlugin[]): Promise<void> {
+    console.log(plugins);
     for (const plugin of plugins) {
       const pluginName = plugin.getName();
+      console.log(pluginName);
       this.plugins.set(pluginName, plugin);
+      console.log('set sucess');
       const tools = plugin.getTools();
+
       for (const tool of tools) {
         await this.registerTool(tool);
       }
@@ -135,7 +139,7 @@ export class Agent extends BaseAgent {
     if (this.db) {
       const networkNames = Object.keys(this.networks);
       if (networkNames.length) {
-        const defaultNetwork = NetworkName.BNB;
+        const defaultNetwork = NetworkName.SOLANA;
         const address = await this.wallet?.getAddress(defaultNetwork);
         if (!address) throw new Error('Not found wallet address');
         const user = await this.db.createAndGetUserByAddress({ address });
@@ -146,7 +150,7 @@ export class Agent extends BaseAgent {
   }
 
   private async createExecutor(): Promise<AgentExecutor> {
-    const wallet_address = await this.wallet?.getAddress(NetworkName.BNB);
+    const wallet_address = await this.wallet?.getAddress(NetworkName.SOLANA);
     console.log('wallet_address', wallet_address);
     const requiredPrompt = `
     Native token address: 
@@ -158,16 +162,14 @@ export class Agent extends BaseAgent {
     Available networks include: ${Object.keys(this.networks).join(', ')}`;
 
     const defaultSystemPrompt = `Pretend to be ${this.config.character ?? 'a helpful blockchain agent'} and you use the project owner's wallet to pay gas fee for deploying token(just deploy token, not transfer or swap).
-     You can help users interact with BNB smart chain. 
+     You can help users interact with SOLANA smart chain. 
      First, you need to understand the user's request and then you need to choose the appropriate tool to execute the user's request.
     When error occurs, describe the error in shortest way.
     Ask users if your understanding is correct and if you need to change anything in the process you have done.
     Respond to the question without inserting blank lines between paragraphs. Ensure all content is written continuously, only breaking lines when necessary.
-    In case you swap tokens, after success return the status, amount, address of the token you swapped from and swapped to and the link of the transaction with this format: "https://bscscan.com/tx/"{{transaction_hash}}.
-    In case you transfer tokens, after success return the status, and the link of the transaction.
-    In case user wants to transfer or swap (only work on this two cases) and the transaction is failed, report the error and add this to your response: 
-    "Your wallet address is ${wallet_address}. Make sure it has enough funds to process."(Remember, this case does not apply when you deploy token(or create token))
-    In case user wants to create wallet, after success return this address which is belong to bnb network: ${wallet_address}.
+    In case you swap tokens, if the tool return success, you need to return the information that the tool return
+    In case user wants to Buy(the same as swap) and the transaction is failed, report the error the tool returned.
+    In case user wants to create wallet, after success return the information: Name, Symbol, and mint address.
     Because of the policy of twitter, max output of length is 280 characters, so you must response to user in a as short as possible(less than 60 words)
     `;
     // console.log(this.config.systemPrompt ?? defaultSystemPrompt);

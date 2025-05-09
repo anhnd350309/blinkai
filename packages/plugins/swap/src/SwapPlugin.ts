@@ -1,4 +1,4 @@
-import { SwapTool } from './SwapTool';
+import { SwapTool } from './SwapTool_v2';
 import { ISwapProvider } from './types';
 import { ProviderRegistry } from './ProviderRegistry';
 import { BaseTool, IPluginConfig, BasePlugin, NetworkName } from '@binkai/core';
@@ -14,11 +14,13 @@ export class SwapPlugin extends BasePlugin {
   public registry: ProviderRegistry;
   private swapTool!: SwapTool;
   private supportedNetworks: Set<string>;
+  public secretKey!: string;
 
-  constructor() {
+  constructor(key: string) {
     super();
     this.registry = new ProviderRegistry();
     this.supportedNetworks = new Set();
+    this.secretKey = key;
   }
 
   getName(): string {
@@ -36,6 +38,7 @@ export class SwapPlugin extends BasePlugin {
       defaultSlippage: config.defaultSlippage,
       defaultNetwork: config.defaultNetwork,
       supportedNetworks: Array.from(this.supportedNetworks),
+      secretKey: this.secretKey,
     });
 
     // Register providers if provided in config

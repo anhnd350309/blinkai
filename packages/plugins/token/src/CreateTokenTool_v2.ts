@@ -132,9 +132,24 @@ export class CreateTokenTool extends BaseTool {
           };
           console.log('🤖 Create token Args:############', args);
           try {
-            const response = await axios.post('https://your-api-url.com/api/create-token', payload);
+            const response = await axios.post(
+              settings.get('BASE_URL') + '/launch-token' ||
+                (() => {
+                  throw new Error('BASE_URL is not defined');
+                })(),
+              payload,
+            );
             console.log('🤖 Token created:', response.data);
-            return response.data;
+            const server_response = response.data;
+            const mint_address = server_response.mint_address;
+            const pool_state = server_response.pool_state;
+            const uri = server_response.uri;
+            const image_url = server_response.image_url;
+            return `Launch token finish with response: ${response.data} this information: 
+                      server_response:${server_response}, 
+                      mint_address: https://letsbonk.fun/token/${mint_address}, 
+                      pool_state: ${pool_state},  
+                      image_url: ${image_url}`;
           } catch (error) {
             console.error('Error creating token:', error);
             throw error;

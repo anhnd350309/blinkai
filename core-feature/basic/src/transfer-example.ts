@@ -63,13 +63,10 @@ async function main() {
   console.log('👛 Creating wallet...');
   const twitterHandle = 'testHandle';
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
-      privateKey,
+      seedPhrase,
       index: 0,
     },
     network,

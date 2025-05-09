@@ -73,13 +73,11 @@ async function main() {
   console.log('👛 Creating wallet...');
   const twitterHandle = 'testHandle';
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
+  const secretKey = walletInfo?.secretKey;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
-      privateKey,
+      seedPhrase,
       index: 0,
     },
     network,
@@ -104,7 +102,10 @@ async function main() {
 
   // Create and configure the swap plugin
   console.log('🔄 Initializing swap plugin...');
-  const swapPlugin = new SwapPlugin();
+  if (!secretKey) {
+    throw new Error('❌ Error: secretKey is undefined. Please ensure it is properly set.');
+  }
+  const swapPlugin = new SwapPlugin(secretKey);
 
   // Create providers with proper chain IDs
   const fourMeme = new FourMemeProvider(provider, 56);

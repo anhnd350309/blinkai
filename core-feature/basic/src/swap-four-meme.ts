@@ -73,13 +73,11 @@ export async function swapFourMeme(twitterHandle: string, request: string): Prom
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
+  const secretKey = walletInfo?.secretKey;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
-      privateKey,
+      seedPhrase,
       index: 0,
     },
     network,
@@ -104,7 +102,10 @@ export async function swapFourMeme(twitterHandle: string, request: string): Prom
 
   // Create and configure the swap plugin
   console.log('🔄 Initializing swap plugin...');
-  const swapPlugin = new SwapPlugin();
+  if (!secretKey) {
+    throw new Error('Secret key is undefined. Please ensure the wallet information is correct.');
+  }
+  const swapPlugin = new SwapPlugin(secretKey);
 
   // Create providers with proper chain IDs
   const fourMeme = new FourMemeProvider(provider, 56);

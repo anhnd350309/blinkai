@@ -28,6 +28,10 @@ export interface SwapParams {
   slippage: number;
 }
 
+export const tokenAddressDict: Record<string, string> = {
+  USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+};
+
 export interface Transaction {
   to: string;
   data: string;

@@ -8,14 +8,11 @@ import {
   NetworkName,
 } from '@binkai/core';
 import { TokenPlugin } from '@binkai/token-plugin';
-import { ethers } from 'ethers';
-import { FourMemeProvider } from '@binkai/four-meme-provider';
 import { BirdeyeProvider } from '@binkai/birdeye-provider';
 import { getOrCreateWallet } from './twitter-db';
 
-// Hardcoded RPC URLs for demonstration
+// Hardcoded RPC URL for Solana
 const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
-const BNB_RPC = 'https://bsc-dataseed1.binance.org';
 
 export async function createToken(twitterHandle: string, request: string): Promise<string> {
   console.log('🚀 Starting BinkOS token info example...\n');
@@ -33,8 +30,8 @@ export async function createToken(twitterHandle: string, request: string): Promi
 
   console.log('🔑 API keys found\n');
 
-  // Define available networks
-  console.log('📡 Configuring networks...');
+  // Define Solana network
+  console.log('📡 Configuring network...');
   const networks: NetworksConfig['networks'] = {
     solana: {
       type: 'solana' as NetworkType,
@@ -48,21 +45,8 @@ export async function createToken(twitterHandle: string, request: string): Promi
         },
       },
     },
-    bnb: {
-      type: 'evm' as NetworkType,
-      config: {
-        chainId: 56,
-        rpcUrl: BNB_RPC,
-        name: 'BNB Chain',
-        nativeCurrency: {
-          name: 'BNB',
-          symbol: 'BNB',
-          decimals: 18,
-        },
-      },
-    },
   };
-  console.log('✓ Networks configured:', Object.keys(networks).join(', '), '\n');
+  console.log('✓ Network configured: Solana\n');
 
   // Initialize network
   console.log('🌐 Initializing network...');
@@ -72,13 +56,10 @@ export async function createToken(twitterHandle: string, request: string): Promi
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
+  const seedPhrase = walletInfo?.seedPhrase;
   const wallet = new Wallet(
     {
-      seedPhrase:
-        settings.get('WALLET_MNEMONIC') ||
-        'test test test test test test test test test test test junk',
-      privateKey,
+      seedPhrase: seedPhrase,
       index: 0,
     },
     network,
@@ -86,7 +67,6 @@ export async function createToken(twitterHandle: string, request: string): Promi
   console.log('✓ Wallet created\n');
 
   console.log('🤖 Wallet Solana:', await wallet.getAddress(NetworkName.SOLANA));
-  console.log('🤖 Wallet BNB:', await wallet.getAddress(NetworkName.BNB));
 
   // Create an agent with OpenAI
   console.log('🤖 Initializing AI agent...');
@@ -104,17 +84,15 @@ export async function createToken(twitterHandle: string, request: string): Promi
   console.log('🔍 Initializing token plugin...');
   const tokenPlugin = new TokenPlugin();
 
-  const provider = new ethers.JsonRpcProvider(BNB_RPC);
-
-  const fourMeme = new FourMemeProvider(provider, 56);
   const birdeye = new BirdeyeProvider({
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
-  // Configure the plugin with supported chains
+
+  // Configure the plugin with Solana chain
   await tokenPlugin.initialize({
-    defaultChain: 'bnb',
-    providers: [birdeye, fourMeme as any],
-    supportedChains: ['bnb'],
+    defaultChain: 'solana',
+    providers: [birdeye],
+    supportedChains: ['solana'],
   });
   console.log('✓ Token plugin initialized\n');
 
@@ -123,26 +101,28 @@ export async function createToken(twitterHandle: string, request: string): Promi
   await agent.registerPlugin(tokenPlugin);
   console.log('✓ Plugin registered\n');
 
-  // Example 1: Create a token on BSC
-  console.log('💎 Example 1: Create a token on BSC');
+  // Create token on Solana
+  console.log('💎 Creating token on Solana');
   const result = await agent.execute({
     input: request,
   });
   console.log('✓ Token created:', result, '\n');
+
   // Get plugin information
   const registeredPlugin = agent.getPlugin('token') as TokenPlugin;
 
-  // Check available providers for each chain
-  console.log('📊 Available providers by chain:');
-  const chains = registeredPlugin.getSupportedNetworks();
-  for (const chain of chains) {
-    const providers = registeredPlugin.getProvidersForNetwork(chain);
-    console.log(`Chain ${chain}:`, providers.map(p => p.getName()).join(', '));
-  }
+  // Check available providers for Solana
+  console.log('📊 Available providers for Solana:');
+  const providers = registeredPlugin.getProvidersForNetwork(NetworkName.SOLANA);
+  console.log('Solana:', providers.map(p => p.getName()).join(', '));
   console.log();
+
   return result;
 }
 
-//   (async () => {
-//     await createToken('testHandle', 'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.');
-//   })();
+(async () => {
+  await createToken(
+    'testHandle',
+    'Create a new token on BNB chain with name: "ITACHI", symbol: "ITC", description: "This is a Itachi Test token". image is https://static.four.meme/market/6fbb933c-7dde-4d0a-960b-008fd727707f4551736094573656710.jpg.',
+  );
+})();

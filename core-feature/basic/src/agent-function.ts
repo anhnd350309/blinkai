@@ -62,11 +62,11 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
   const walletInfo = await getOrCreateWallet(twitterHandle);
-  const privateKey = walletInfo?.privateKey;
-  console.log(privateKey);
+  const seedPhrase = walletInfo?.seedPhrase;
+  const secretKey = walletInfo?.secretKey;
   const wallet = new Wallet(
     {
-      privateKey,
+      seedPhrase: seedPhrase,
       index: 0,
     },
     network,
@@ -90,16 +90,16 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   console.log('✓ Agent initialized\n');
 
   // Create and configure the token plugin
-  console.log('🔍 Initializing token plugin...');
+
   await agent.registerDatabase(
     new PostgresDatabaseAdapter({
       connectionString: settings.get('POSTGRES_URL'),
     }),
   );
-
+  console.log('🔍 Initializing token plugin...');
   const tokenPlugin = new TokenPlugin();
 
-  const provider = new ethers.JsonRpcProvider(BNB_RPC);
+  const provider = new ethers.JsonRpcProvider(SOLANA_RPC);
 
   const fourMeme = new FourMemeProvider(provider, 56);
   const pancakeswap = new PancakeSwapProvider(provider, 56);
@@ -108,11 +108,11 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
     apiKey: settings.get('BIRDEYE_API_KEY'),
   });
   const bnbProvider = new BnbProvider({
-    rpcUrl: BNB_RPC,
+    rpcUrl: SOLANA_RPC,
   });
 
-  // TOKEN PLUGIN
-  // Configure the plugin with supported chains
+  // // TOKEN PLUGIN
+  // // Configure the plugin with supported chains
   await tokenPlugin.initialize({
     defaultChain: 'bnb',
     providers: [bnbProvider, fourMeme as any],
@@ -127,38 +127,41 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // SWAP PLUGIN
   console.log('🔄 Initializing swap plugin...');
-  const swapPlugin = new SwapPlugin();
+  if (!secretKey) {
+    throw new Error('❌ Error: secretKey is undefined. Cannot initialize SwapPlugin.');
+  }
+  const swapPlugin = new SwapPlugin(secretKey);
 
   // Configure the plugin with supported chains
   await swapPlugin.initialize({
     defaultSlippage: 5,
     defaultChain: 'bnb',
     providers: [kyber],
-    supportedChains: ['bnb', 'ethereum'], // These will be intersected with agent's networks
+    supportedChains: ['bnb', 'solana'], // These will be intersected with agent's networks
   });
   console.log('✓ Swap plugin initialized\n');
 
-  // Register the plugin with the agent
+  // // Register the plugin with the agent
   console.log('🔌 Registering swap plugin with agent...');
   await agent.registerPlugin(swapPlugin);
   console.log('✓ Swap Plugin registered\n');
 
-  // WALLET PLUGIN
-  console.log('🔄 Initializing wallet plugin...');
-  const walletPlugin = new WalletPlugin();
+  // // WALLET PLUGIN
+  // console.log('🔄 Initializing wallet plugin...');
+  // const walletPlugin = new WalletPlugin();
 
-  // Configure the plugin with supported chains
-  await walletPlugin.initialize({
-    defaultChain: 'bnb',
-    providers: [bnbProvider],
-    supportedChains: ['bnb'],
-  });
-  console.log('✓ Wallet plugin initialized\n');
+  // // Configure the plugin with supported chains
+  // await walletPlugin.initialize({
+  //   defaultChain: 'bnb',
+  //   providers: [bnbProvider],
+  //   supportedChains: ['bnb'],
+  // });
+  // console.log('✓ Wallet plugin initialized\n');
 
-  // Register the plugin with the agent
-  console.log('🔌 Registering wallet plugin with agent...');
-  await agent.registerPlugin(walletPlugin);
-  console.log('✓ Wallet Plugin registered\n');
+  // // Register the plugin with the agent
+  // console.log('🔌 Registering wallet plugin with agent...');
+  // await agent.registerPlugin(walletPlugin);
+  // console.log('✓ Wallet Plugin registered\n');
 
   // Agent execute
   console.log('💱 Executing user request...');
