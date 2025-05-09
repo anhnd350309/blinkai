@@ -34,7 +34,7 @@ export class SwapTool extends BaseTool {
   constructor(config: SwapToolConfig) {
     super(config);
     this.registry = new ProviderRegistry();
-    this.defaultSlippage = config.defaultSlippage || 0.5;
+    this.defaultSlippage = config.defaultSlippage || 1;
     this.supportedNetworks = new Set<string>(config.supportedNetworks || []);
     this.secretKey = config.secretKey;
   }
@@ -101,7 +101,7 @@ export class SwapTool extends BaseTool {
       token_address: z
         .string()
         .optional()
-        .describe(`The adress of token or name of token user want to buy`),
+        .describe(`The address of token or name of token user want to buy`),
       amount_sol: z.number().describe('The amount of tokens user want to spend to buy other token'),
       slippage: z
         .number()
@@ -123,7 +123,7 @@ export class SwapTool extends BaseTool {
         onProgress?: (data: ToolProgress) => void,
       ) => {
         try {
-          const { tokenName, token_address: tokenAddress, amount_sol, slippage } = args;
+          let { tokenName, token_address: tokenAddress, amount_sol, slippage } = args;
           console.log('🔄 Doing swap operation SwapTool_V2...');
           console.log('🤖 Swap Args:', args);
           const keypair = this.secretKey;
@@ -134,6 +134,10 @@ export class SwapTool extends BaseTool {
           if (tokenName !== undefined && tokenAddressDict[tokenName.toUpperCase()] === undefined) {
             console.log('🤖 Token address not found in dictionary');
             return `Do not have token address of ${tokenName}, please provide address of this token`;
+          }
+
+          if (slippage === undefined) {
+            slippage = this.defaultSlippage;
           }
 
           let payload;
