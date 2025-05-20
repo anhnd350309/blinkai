@@ -2,8 +2,8 @@ import express, { Request, Response, RequestHandler } from 'express';
 import { agentFunction } from './agent-function';
 
 const agentFunctionHandler = async () => {
-  const twitterHandle = '1722551467192860673';
-  const request = 'Deploy token symbol: BITT, name: BTC';
+  const twitterHandle = '1722551467192860675';
+  const request = 'Deploy token symbol: BITT, name: BTC in eth';
   console.log('twitterHandle', twitterHandle);
   console.log('request', request);
   const result = await agentFunction(twitterHandle, request);

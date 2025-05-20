@@ -139,7 +139,7 @@ export class Agent extends BaseAgent {
     if (this.db) {
       const networkNames = Object.keys(this.networks);
       if (networkNames.length) {
-        const defaultNetwork = NetworkName.SOLANA;
+        const defaultNetwork = NetworkName.ETHEREUM;
         const address = await this.wallet?.getAddress(defaultNetwork);
         if (!address) throw new Error('Not found wallet address');
         const user = await this.db.createAndGetUserByAddress({ address });
@@ -150,7 +150,7 @@ export class Agent extends BaseAgent {
   }
 
   private async createExecutor(): Promise<AgentExecutor> {
-    const wallet_address = await this.wallet?.getAddress(NetworkName.SOLANA);
+    const wallet_address = await this.wallet?.getAddress(NetworkName.ETHEREUM);
     console.log('wallet_address', wallet_address);
     const requiredPrompt = `
     Native token address: 

@@ -11,7 +11,7 @@ export async function createUserTable(): Promise<void> {
     // Create a connection using the MySQL URL from environment variables
     console.log('MYSQL_URL', process.env.MYSQL_URL);
     const connection = await mysql.createConnection(process.env.MYSQL_URL as string);
-    // await connection.execute(`DROP TABLE IF EXISTS users`);
+    await connection.execute(`DROP TABLE IF EXISTS users`);
 
     // SQL query to create the user table
     const createTableQuery = `
@@ -21,6 +21,7 @@ export async function createUserTable(): Promise<void> {
         seed_phrase VARCHAR(255) NOT NULL,
         secret_key VARCHAR(255) NOT NULL,
         public_key VARCHAR(255) NOT NULL,
+        private_key VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )

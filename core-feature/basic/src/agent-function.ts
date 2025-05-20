@@ -10,7 +10,7 @@ import {
 import { TokenPlugin } from '@binkai/token-plugin';
 import { ethers } from 'ethers';
 import { FourMemeProvider } from '@binkai/four-meme-provider';
-import { getOrCreateWallet } from './twitter-db';
+import { getOrCreateWallet, getOrCreateWalletEVM } from './twitter-db';
 import { SwapPlugin } from '@binkai/swap-plugin';
 import { WalletPlugin } from '@binkai/wallet-plugin';
 import { BnbProvider } from '@binkai/rpc-provider';
@@ -20,7 +20,7 @@ import { PancakeSwapProvider } from '@binkai/pancakeswap-provider';
 import { KyberProvider } from '@binkai/kyber-provider';
 // Hardcoded RPC URLs for demonstration
 const BNB_RPC = 'https://bsc-dataseed1.binance.org';
-const SOLANA_RPC = 'https://api.mainnet-beta.solana.com';
+const ETH_RPC = 'https://eth.llamarpc.com';
 
 export async function agentFunction(twitterHandle: string, request: string): Promise<string> {
   // Check required environment variables
@@ -39,15 +39,16 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   // Define available networks
   console.log('📡 Configuring networks...');
   const networks: NetworksConfig['networks'] = {
-    solana: {
-      type: 'solana' as NetworkType,
+    ethereum: {
+      type: 'evm' as NetworkType,
       config: {
-        rpcUrl: SOLANA_RPC,
-        name: 'Solana',
+        chainId: 1,
+        rpcUrl: ETH_RPC,
+        name: 'Ethereum',
         nativeCurrency: {
-          name: 'Solana',
-          symbol: 'SOL',
-          decimals: 9,
+          name: 'Ether',
+          symbol: 'ETH',
+          decimals: 18,
         },
       },
     },
@@ -61,19 +62,22 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
 
   // Initialize a new wallet
   console.log('👛 Creating wallet...');
-  const walletInfo = await getOrCreateWallet(twitterHandle);
+  const walletInfo = await getOrCreateWalletEVM(twitterHandle);
   const seedPhrase = walletInfo?.seedPhrase;
   const secretKey = walletInfo?.secretKey;
+  const privateKey = walletInfo?.secretKey;
+  console.log(privateKey);
   const wallet = new Wallet(
     {
-      seedPhrase: seedPhrase,
+      // seedPhrase: seedPhrase,
+      privateKey: privateKey,
       index: 0,
     },
     network,
   );
   console.log('✓ Wallet created\n');
 
-  console.log('🤖 Wallet Solana:', await wallet.getAddress(NetworkName.SOLANA));
+  console.log('🤖 Wallet ethereum:', await wallet.getAddress(NetworkName.ETHEREUM));
 
   // Create an agent with OpenAI
   console.log('🤖 Initializing AI agent...');
@@ -99,24 +103,20 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   console.log('🔍 Initializing token plugin...');
   const tokenPlugin = new TokenPlugin();
 
-  const provider = new ethers.JsonRpcProvider(SOLANA_RPC);
+  const provider = new ethers.JsonRpcProvider(ETH_RPC);
 
   const fourMeme = new FourMemeProvider(provider, 56);
-  const pancakeswap = new PancakeSwapProvider(provider, 56);
   const kyber = new KyberProvider(provider, 56);
-  const birdeye = new BirdeyeProvider({
-    apiKey: settings.get('BIRDEYE_API_KEY'),
-  });
-  const bnbProvider = new BnbProvider({
-    rpcUrl: SOLANA_RPC,
+  const ethProvider = new BnbProvider({
+    rpcUrl: ETH_RPC,
   });
 
   // // TOKEN PLUGIN
   // // Configure the plugin with supported chains
   await tokenPlugin.initialize({
-    defaultChain: 'bnb',
-    providers: [bnbProvider, fourMeme as any],
-    supportedChains: ['bnb'],
+    defaultChain: 'eth',
+    providers: [ethProvider, fourMeme as any],
+    supportedChains: ['bnb', 'eth'], // These will be intersected with agent's networks
   });
   console.log('✓ Token plugin initialized\n');
 
@@ -130,20 +130,20 @@ export async function agentFunction(twitterHandle: string, request: string): Pro
   if (!secretKey) {
     throw new Error('❌ Error: secretKey is undefined. Cannot initialize SwapPlugin.');
   }
-  const swapPlugin = new SwapPlugin(secretKey);
+  // const swapPlugin = new SwapPlugin(secretKey);
 
   // Configure the plugin with supported chains
-  await swapPlugin.initialize({
-    defaultSlippage: 5,
-    defaultChain: 'bnb',
-    providers: [kyber],
-    supportedChains: ['bnb', 'solana'], // These will be intersected with agent's networks
-  });
-  console.log('✓ Swap plugin initialized\n');
+  // await swapPlugin.initialize({
+  //   defaultSlippage: 5,
+  //   defaultChain: 'bnb',
+  //   providers: [kyber],
+  //   supportedChains: ['bnb'], // These will be intersected with agent's networks
+  // });
+  // console.log('✓ Swap plugin initialized\n');
 
-  // // Register the plugin with the agent
-  console.log('🔌 Registering swap plugin with agent...');
-  await agent.registerPlugin(swapPlugin);
+  // // // Register the plugin with the agent
+  // console.log('🔌 Registering swap plugin with agent...');
+  // await agent.registerPlugin(swapPlugin);
   console.log('✓ Swap Plugin registered\n');
 
   // // WALLET PLUGIN

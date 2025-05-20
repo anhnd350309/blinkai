@@ -35,7 +35,7 @@ export class Wallet implements IWallet {
     // Initialize EVM wallet
 
     if (config.privateKey) {
-      console.log(config.privateKey);
+      console.log('This one', config.privateKey);
       this.#evmWallet = new ethers.Wallet(config.privateKey);
     } else if (config.seedPhrase) {
       this.#evmWallet = ethers.Wallet.fromPhrase(config.seedPhrase);
